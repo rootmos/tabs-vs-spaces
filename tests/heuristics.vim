@@ -1,11 +1,18 @@
 " strict tests
-call AssertEq(TabScore($EXAMPLES . "/tiny-tabs.c"), 1)
-call AssertEq(TabScore($EXAMPLES . "/tiny-spaces.c"), 0)
-call AssertEq(SpaceScore($EXAMPLES . "/tiny-tabs.c"), 0)
-call AssertEq(SpaceScore($EXAMPLES . "/tiny-spaces.c"), 1)
+let tt = readfile($EXAMPLES . "/tiny-tabs.c")
+let ts = readfile($EXAMPLES . "/tiny-spaces.c")
 
-call AssertEq(GuessIndentationLevel($EXAMPLES . "/tiny-spaces.c"), 4)
+call AssertEq(TabScore([]), 0)
+call AssertEq(SpaceScore([]), 0)
+
+call AssertEq(TabScore(tt), 1)
+call AssertEq(TabScore(ts), 0)
+call AssertEq(SpaceScore(tt), 0)
+call AssertEq(SpaceScore(ts), 1)
+
+call AssertLt(g:tabs_vs_spaces_max_indentation_level, GuessIndentationLevel([]))
+call AssertEq(GuessIndentationLevel(ts), 4)
 
 " lenient comparison tests
-call AssertLt(SpaceScore($EXAMPLES . "/tiny-tabs.c"), TabScore($EXAMPLES . "/tiny-tabs.c"))
-call AssertLt(TabScore($EXAMPLES . "/tiny-spaces.c"), SpaceScore($EXAMPLES . "/tiny-spaces.c"))
+call AssertLt(SpaceScore(tt), TabScore(tt))
+call AssertLt(TabScore(ts), SpaceScore(ts))

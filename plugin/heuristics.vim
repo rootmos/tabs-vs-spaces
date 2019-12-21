@@ -1,6 +1,6 @@
-function TabScore(fn)
+function TabScore(ls)
   let c = 0
-  for l in readfile(a:fn)
+  for l in a:ls
     if l[0] ==? "\t"
       let c += 1
     endif
@@ -8,9 +8,9 @@ function TabScore(fn)
   return c
 endfunction
 
-function SpaceScore(fn)
+function SpaceScore(ls)
   let c = 0
-  for l in readfile(a:fn)
+  for l in a:ls
     if l[0] ==? " "
       let c += 1
     endif
@@ -18,9 +18,11 @@ function SpaceScore(fn)
   return c
 endfunction
 
-function GuessIndentationLevel(fn)
+let g:tabs_vs_spaces_max_indentation_level = 12
+
+function GuessIndentationLevel(ls)
   let c = {}
-  for l in readfile(a:fn)
+  for l in a:ls
     let lc = 0
     for i in range(strlen(l))
       if l[i] ==? " "
@@ -40,7 +42,7 @@ function GuessIndentationLevel(fn)
 
   let best_model = 0
   let best_score = 0
-  for m in range(1, 12)
+  for m in range(1, g:tabs_vs_spaces_max_indentation_level + 1)
     let e = 0
     for k in keys(c)
       if k % m != 0

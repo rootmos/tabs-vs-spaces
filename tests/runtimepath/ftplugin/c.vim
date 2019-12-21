@@ -1,1 +1,1 @@
-call TabsVsSpaces(2)
+call TabsVsSpaces(g:tabs_vs_spaces)
