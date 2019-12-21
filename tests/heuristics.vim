@@ -1,19 +1,3 @@
-function AssertEq(x, y)
-  if a:x !=# a:y
-    echom a:x . " !=# " . a:y
-    echom ""
-    cquit
-  endif
-endfunction
-
-function AssertLt(x, y)
-  if a:x >= a:y
-    echom a:x . " >= " . a:y
-    echom ""
-    cquit
-  endif
-endfunction
-
 " strict tests
 call AssertEq(TabScore($EXAMPLES . "/tiny-tabs.c"), 1)
 call AssertEq(TabScore($EXAMPLES . "/tiny-spaces.c"), 0)

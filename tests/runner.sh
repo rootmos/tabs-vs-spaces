@@ -7,6 +7,7 @@ ROOT=$SCRIPT_DIR/..
 export EXAMPLES=$SCRIPT_DIR/examples
 
 exec ${VIM-vim} -i NONE -u NONE -U NONE -V1 -X -nNes \
-    --cmd "set runtimepath=$ROOT,\$VIMRUNTIME" \
+    --cmd "set runtimepath=$SCRIPT_DIR/runtimepath,$ROOT,\$VIMRUNTIME" \
     --cmd 'set loadplugins' \
+    -c"source $SCRIPT_DIR/asserts.vim" \
     -c'source % | echo "" | qall!' -- "$@"
