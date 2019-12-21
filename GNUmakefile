@@ -6,7 +6,7 @@ tests:
 DOCKER ?= docker
 
 test-in-docker: .docker-image
-	$(DOCKER) run --rm $(file <$<)
+	$(DOCKER) run --rm $(shell cat $<)
 
 .PHONY: .docker-image
 .docker-image: .FORCE
