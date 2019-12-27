@@ -10,6 +10,9 @@ function TabsVsSpaces(preferred_tab_width)
   if ts < ss || (ts == ss && a:preferred_tab_width >= 0)
     if ls != ['']
       let t = GuessIndentationLevel(ls)
+      if t > g:tabs_vs_spaces_max_indentation_level
+        let t = 0
+      endif
     endif
     let m = 1
     setlocal expandtab
@@ -18,9 +21,10 @@ function TabsVsSpaces(preferred_tab_width)
     setlocal noexpandtab
   endif
 
-  let &l:tabstop = t
-  let &l:softtabstop = t
-  let &l:shiftwidth = t
-
-  let b:tabs_vs_spaces = m * t
+  if t > 0
+    let &l:tabstop = t
+    let &l:softtabstop = t
+    let &l:shiftwidth = t
+    let b:tabs_vs_spaces = m * t
+  endif
 endfunction
