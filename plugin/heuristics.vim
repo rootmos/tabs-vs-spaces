@@ -39,8 +39,8 @@ function GuessIndentationLevel(ls)
     endif
   endfor
 
-  let best_model = -1
-  let best_score = -1
+  let best_model_0 = -1
+  let best_score_0 = -1
   for m in range(2, g:tabs_vs_spaces_max_indentation_level + 1)
     let e = 0
     for k in keys(c)
@@ -48,11 +48,36 @@ function GuessIndentationLevel(ls)
         let e += c[k]
       endif
     endfor
-    if (best_score < 0) || (e <= best_score)
-      let best_model = m
-      let best_score = e
+    if (best_score_0 < 0) || (e <= best_score_0)
+      let best_model_0 = m
+      let best_score_0 = e
     endif
   endfor
 
-  return best_model
+  let best_model_1 = -1
+  let best_score_1 = -1
+  for m in range(2, g:tabs_vs_spaces_max_indentation_level + 1)
+    let n = 0
+    let s = 0
+    while c->has_key(n)
+      let s += c[n]
+      let n += m
+    endwhile
+    if s >= best_score_1
+      let best_model_1 = m
+      let best_score_1 = s
+    endif
+  endfor
+
+  if best_model_0 ==? best_model_1
+    return best_model_1
+  else
+    let m = best_model_0 < best_model_1 ? best_model_0 : best_model_1
+    let M = best_model_0 < best_model_1 ? best_model_1 : best_model_0
+    if M % m ==? 0
+      return M
+    else
+      return m
+    endif
+  endif
 endfunction
