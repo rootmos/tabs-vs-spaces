@@ -23,7 +23,7 @@ function M.inspect(f)
 				if s > 0 and t == 0 then
 					spaces[s] = (spaces[s] or 0) + 1
 				elseif s == 0 and t > 0 then
-					tabs[s] = (tabs[s] or 0) + 1
+					tabs[t] = (tabs[t] or 0) + 1
 				elseif s > 0 and t > 0 then
 					mixed = mixed + 1
 				else
@@ -41,7 +41,53 @@ function M.inspect(f)
 		spaces = spaces,
 		mixed = mixed,
 		empty = empty,
+		tab_score = M.tab_score,
+		spaces_score = M.spaces_score,
+		decide = M.decide,
 	}
+end
+
+local function mk_score(t)
+	local I, Q = nil, 0
+	for i, _ in pairs(t) do
+		local q = 0
+		for s, n in pairs(t) do
+			if s % i == 0 then
+				q = q + n
+			end
+		end
+		if q > Q then
+			Q = q
+			I = i
+		end
+	end
+	return I, Q
+end
+
+function M.tab_score(st)
+	return mk_score(st.tabs)
+end
+
+function M.spaces_score(st)
+	return mk_score(st.spaces)
+end
+
+function M.decide(st, default)
+	local t, tq = st:tab_score()
+	local s, sq = st:spaces_score()
+	if tq == 0 and sq == 0 then
+		return default
+	elseif tq > sq then
+		return -t
+	elseif sq > tq then
+		return s
+	else
+		if default or 0 >= 0 then
+			return s
+		else
+			return -t
+		end
+	end
 end
 
 return M
