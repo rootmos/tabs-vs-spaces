@@ -2,37 +2,49 @@ local M = {}
 
 local C = require(.....".char")
 
-function M.inspect(f)
+local function lnext(buf, i)
+	local ls = vim.api.nvim_buf_get_lines(buf, i, i+1, false)
+	if #ls == 0 then
+		return nil
+	else
+		return i+1, ls[1]
+	end
+end
+
+function M.lines(buf)
+	return lnext, (buf or 0), 0
+end
+
+function M.inspect(...)
 	local lines = 0
 	local tabs, spaces, mixed, empty = {}, {}, 0, 0
 
-	local st, t, s = 0, 0, 0
-	for _, c in C.stream(f) do
-		if st == 0 then
+	for _, l in ... do
+		local i, t, s = 1, 0, 0
+
+		while true do
+			local c = l:byte(i)
 			if c == 32 then
 				s = s + 1
 			elseif c == 9 then
 				t = t + 1
 			else
-				st = 1
+				break
 			end
+			i = i + 1
 		end
 
-		if st == 1 then
-			if c == 10 then
-				if s > 0 and t == 0 then
-					spaces[s] = (spaces[s] or 0) + 1
-				elseif s == 0 and t > 0 then
-					tabs[t] = (tabs[t] or 0) + 1
-				elseif s > 0 and t > 0 then
-					mixed = mixed + 1
-				else
-					empty = empty + 1
-				end
-				lines = lines + 1
-				st, t, s = 0, 0, 0
-			end
+		if s > 0 and t == 0 then
+			spaces[s] = (spaces[s] or 0) + 1
+		elseif s == 0 and t > 0 then
+			tabs[t] = (tabs[t] or 0) + 1
+		elseif s > 0 and t > 0 then
+			mixed = mixed + 1
+		else
+			empty = empty + 1
 		end
+
+		lines = lines + 1
 	end
 
 	return {
@@ -87,6 +99,18 @@ function M.decide(st, default)
 		else
 			return -t
 		end
+	end
+end
+
+function M.apply(buf, decision)
+	local b = vim.b[buf]
+	if decision > 0 then
+		b.tabstop = decision
+		b.softtabstop = decision
+		b.shiftwidth = decision
+		b.expandtab = true
+	elseif decision < 0 then
+		b.expandtab = false
 	end
 end
 
