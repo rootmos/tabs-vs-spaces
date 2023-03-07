@@ -1,7 +1,5 @@
 local M = {}
 
-local C = require(.....".char")
-
 local function lnext(buf, i)
     local ls = vim.api.nvim_buf_get_lines(buf, i, i+1, false)
     if #ls == 0 then
@@ -104,13 +102,18 @@ end
 
 function M.apply(buf, decision)
     local b = vim.b[buf]
+    b.tabs_vs_spaces = {
+        decision = decision
+    }
+
+    local o = vim.bo[buf]
     if decision > 0 then
-        b.tabstop = decision
-        b.softtabstop = decision
-        b.shiftwidth = decision
-        b.expandtab = true
+        o.tabstop = decision
+        o.softtabstop = decision
+        o.shiftwidth = decision
+        o.expandtab = true
     elseif decision < 0 then
-        b.expandtab = false
+        o.expandtab = false
     end
 end
 
