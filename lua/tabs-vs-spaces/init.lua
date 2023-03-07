@@ -115,7 +115,7 @@ function M.apply(buf, decision)
 end
 
 return setmetatable(M, {
-	__call = function(buf, default)
+	__call = function(L, buf, default)
 		L.apply(buf, L.inspect(L.lines(buf)):decide(default))
 	end,
 })
