@@ -1,5 +1,3 @@
-let b:tabs_vs_spaces = 0
-
 " negative values means prefer tabs over spaces
 function TabsVsSpaces(preferred_tab_width)
   let ls = getline(1, '$')
