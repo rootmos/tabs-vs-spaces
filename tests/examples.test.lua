@@ -34,4 +34,46 @@ function test_decision()
     lu.assertEquals(inspect("examples/neovim.c"):decide(), 2)
 end
 
+function test_nvim_plugin()
+    local function run(fn)
+        local cmd = "./nvim-test.sh " .. fn
+        return load(io.popen(cmd):read("a"))()
+    end
+
+    lu.assertEquals(run("examples/tiny-spaces.c"), {
+        decision = 4,
+        expandtab = true,
+        softtabstop = 4,
+        shiftwidth = 4,
+    })
+
+    lu.assertEquals(run("examples/tiny-tabs.c"), {
+        decision = -1,
+        expandtab = false,
+        softtabstop = 0,
+        shiftwidth = 8,
+    })
+
+    lu.assertEquals(run("examples/real-world.c"), {
+        decision = 4,
+        expandtab = true,
+        softtabstop = 4,
+        shiftwidth = 4,
+    })
+
+    lu.assertEquals(run("examples/pipeline.c"), {
+        decision = 2,
+        expandtab = true,
+        softtabstop = 2,
+        shiftwidth = 2,
+    })
+
+    lu.assertEquals(run("examples/neovim.c"), {
+        decision = 2,
+        expandtab = true,
+        softtabstop = 2,
+        shiftwidth = 2,
+    })
+end
+
 os.exit(lu.LuaUnit.run())
