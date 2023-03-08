@@ -31,6 +31,7 @@ function test_decision()
 
     lu.assertEquals(inspect("examples/real-world.c"):decide(), 4)
     lu.assertEquals(inspect("examples/pipeline.tf"):decide(), 2)
+    lu.assertEquals(inspect("examples/neovim.c"):decide(), 2)
 end
 
 os.exit(lu.LuaUnit.run())

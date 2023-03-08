@@ -14,9 +14,11 @@ trap 'rm -rf $TMP' EXIT
 LUA=${LUA-lua}
 
 PREPARE_ONLY=
-while getopts "b:p-" OPT; do
+PREPARE_SKIP=
+while getopts "pP-" OPT; do
     case $OPT in
         p) PREPARE_ONLY=1 ;;
+        P) PREPARE_SKIP=1 ;;
         -) break ;;
         ?) exit 2 ;;
     esac
@@ -24,12 +26,14 @@ done
 shift $((OPTIND-1))
 
 DEPS=${DEPS-$SCRIPT_DIR/.deps}
-mkdir -p "$DEPS"
 
-fetch -s \
-    "https://raw.githubusercontent.com/bluebird75/luaunit/LUAUNIT_V3_4/luaunit.lua" \
-    "bf3e3fb25b77739fa1ebc324582776d26486e32e49c150628bc21b9b9e6ce645" \
-    "$DEPS/luaunit.lua"
+if [ -z "$PREPARE_SKIP" ]; then
+    mkdir -p "$DEPS"
+    fetch -s \
+        "https://raw.githubusercontent.com/bluebird75/luaunit/LUAUNIT_V3_4/luaunit.lua" \
+        "bf3e3fb25b77739fa1ebc324582776d26486e32e49c150628bc21b9b9e6ce645" \
+        "$DEPS/luaunit.lua"
+fi
 
 find "$@" -name "*test.lua" > "$TMP/tests"
 mapfile -t TESTS < "$TMP/tests"
@@ -43,7 +47,7 @@ for t in "${TESTS[@]}"; do
         echo "# $(basename --suffix=".test.lua" "$t")" tests
     fi
 
-    if [ -f "$ROOT/Makefile" ]; then
+    if [ -z "$PREPARE_SKIP" ] && [ -f "$ROOT/Makefile" ]; then
         make -C "$ROOT" | sed 's/^/  /'
     fi
 

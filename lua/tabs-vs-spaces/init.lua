@@ -59,11 +59,11 @@ end
 
 local function mk_score(t)
     local I, Q = nil, 0
-    for i, _ in pairs(t) do
+    for i, N in pairs(t) do
         local q = 0
         for s, n in pairs(t) do
             if s % i == 0 then
-                q = q + n
+                q = q + N*n
             end
         end
         if q > Q then

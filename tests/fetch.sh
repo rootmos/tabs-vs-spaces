@@ -1,3 +1,5 @@
+#!/bin/bash
+
 fetch() {
     SYMLINK=
     FETCH_STYLE=${FETCH_STYLE-default}
@@ -44,3 +46,7 @@ fetch() {
         cp "$CACHE" "$TARGET"
     fi
 }
+
+if ! (return 0 2>/dev/null); then
+    fetch "$1" "$2" "$3"
+fi
