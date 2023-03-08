@@ -26,8 +26,8 @@ EOF
 SCRIPT=$TMP/go.lua
 OUTPUT=$TMP/output
 cat <<EOF > "$SCRIPT"
-local b = vim.b[0]
-local bo = vim.bo[0]
+local b = vim.b
+local bo = vim.bo
 local f = io.open("$OUTPUT", "w")
 f:write("return {")
 f:write(string.format("decision = %s,", b.tabs_vs_spaces.decision))
