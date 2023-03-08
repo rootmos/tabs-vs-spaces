@@ -1,0 +1,75 @@
+#!/bin/bash
+
+set -o nounset -o pipefail -o errexit
+
+SCRIPT_DIR=$(readlink -f "$0" | xargs dirname)
+. "$SCRIPT_DIR/fetch.sh"
+export FETCH_CACHE=$(readlink -f "$SCRIPT_DIR/.cache")
+
+LIB_DIR=$(readlink -f "$SCRIPT_DIR/../lua")
+
+TMP=$(mktemp -d)
+trap 'rm -rf $TMP' EXIT
+
+LUA=${LUA-lua}
+
+PREPARE_ONLY=
+PREPARE_SKIP=
+while getopts "pP-" OPT; do
+    case $OPT in
+        p) PREPARE_ONLY=1 ;;
+        P) PREPARE_SKIP=1 ;;
+        -) break ;;
+        ?) exit 2 ;;
+    esac
+done
+shift $((OPTIND-1))
+
+DEPS=${DEPS-$SCRIPT_DIR/.deps}
+
+if [ -z "$PREPARE_SKIP" ]; then
+    mkdir -p "$DEPS"
+    fetch -s \
+        "https://raw.githubusercontent.com/bluebird75/luaunit/LUAUNIT_V3_4/luaunit.lua" \
+        "bf3e3fb25b77739fa1ebc324582776d26486e32e49c150628bc21b9b9e6ce645" \
+        "$DEPS/luaunit.lua"
+fi
+
+find "$@" -name "*test.lua" > "$TMP/tests"
+mapfile -t TESTS < "$TMP/tests"
+
+EC=0
+for t in "${TESTS[@]}"; do
+    TEST=$(readlink -f "$t")
+    ROOT=$(dirname "$TEST")
+    if [ "$(basename "$TEST")" = "test.lua" ]; then
+        echo "# $(basename "$ROOT") tests"
+    else
+        echo "# $(basename --suffix=".test.lua" "$TEST")" tests
+    fi
+
+    if [ -z "$PREPARE_SKIP" ] && [ -f "$ROOT/Makefile" ]; then
+        make -C "$ROOT" | sed 's/^/  /'
+    fi
+
+    if [ -n "$PREPARE_ONLY" ]; then
+        continue
+    fi
+
+    LUA_PATH="$DEPS/?.lua"
+    LUA_PATH="$SCRIPT_DIR/?.lua;$SCRIPT_DIR/?/init.lua;$LUA_PATH"
+    LUA_PATH="$ROOT/?.lua;$ROOT/?/init.lua;$LUA_PATH"
+    LUA_PATH="$LIB_DIR/?.lua;$LIB_DIR/?/init.lua;$LUA_PATH"
+    LUA_CPATH="$ROOT/?.so"
+
+    set +o errexit
+    env -C "$ROOT" LUA_PATH="$LUA_PATH" LUA_CPATH="$LUA_CPATH" \
+        $LUA "$TEST" -v -p "${2-}" \
+        | sed 's/^/  /'
+    ec=$?
+    if [ "$ec" != 0 ]; then
+        EC=$ec
+    fi
+    set -o errexit
+done
+exit "$EC"

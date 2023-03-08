@@ -1,0 +1,21 @@
+name: Run tests
+on: [ push ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.17
+    env:
+      LUA: lua5.4
+    steps:
+      - name: Install dependencies
+        run: |
+          apk update
+          apk add wget lua5.4 bash make coreutils neovim
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Prepare tests
+        run: tests/run -p
+      - name: Run tests
+        run: tests/run -P
