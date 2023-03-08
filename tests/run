@@ -40,11 +40,12 @@ mapfile -t TESTS < "$TMP/tests"
 
 EC=0
 for t in "${TESTS[@]}"; do
-    ROOT=$(dirname "$(readlink -f "$t")")
-    if [ "$(basename "$t")" = "test.lua" ]; then
+    TEST=$(readlink -f "$t")
+    ROOT=$(dirname "$TEST")
+    if [ "$(basename "$TEST")" = "test.lua" ]; then
         echo "# $(basename "$ROOT") tests"
     else
-        echo "# $(basename --suffix=".test.lua" "$t")" tests
+        echo "# $(basename --suffix=".test.lua" "$TEST")" tests
     fi
 
     if [ -z "$PREPARE_SKIP" ] && [ -f "$ROOT/Makefile" ]; then
@@ -62,8 +63,8 @@ for t in "${TESTS[@]}"; do
     LUA_CPATH="$ROOT/?.so"
 
     set +o errexit
-    env LUA_PATH="$LUA_PATH" LUA_CPATH="$LUA_CPATH" \
-        $LUA "$t" -v -p "${2-}" \
+    env -C "$ROOT" LUA_PATH="$LUA_PATH" LUA_CPATH="$LUA_CPATH" \
+        $LUA "$TEST" -v -p "${2-}" \
         | sed 's/^/  /'
     ec=$?
     if [ "$ec" != 0 ]; then
